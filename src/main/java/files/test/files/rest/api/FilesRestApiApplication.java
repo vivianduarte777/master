@@ -20,6 +20,7 @@ public class FilesRestApiApplication {
         SpringApplication.run(FilesRestApiApplication.class, args);
     }
 
+
     @Bean
     public ServletWebServerFactory servletContainer(){
         TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory(){
@@ -40,11 +41,11 @@ public class FilesRestApiApplication {
         return tomcat;
     }
 
-    private Connector httToHttpsRedirectConnector(){
+    private Connector httToHttpsRedirectConnector() {
         Connector con = new Connector(TomcatServletWebServerFactory.DEFAULT_PROTOCOL);
         con.setScheme("http");
         con.setPort(8082);
-        con.setSecure(true);
+        con.setSecure(false);
         con.setRedirectPort(8443);
         return con;
     }

@@ -1,8 +1,14 @@
 package files.test.files.rest.api.controller;
 
+import ch.qos.logback.core.rolling.helper.FileNamePattern;
 import files.test.files.rest.api.model.FileReadedInformation;
 import files.test.files.rest.api.service.FileReadServiceImpl;
 
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -10,20 +16,16 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.net.*;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 //Rest Application
@@ -31,79 +33,65 @@ import java.util.stream.Stream;
 @RequestMapping("/api/read")
 public class ReadFileController {
     private final String uriAddress = "https://github.com/vivianduarte777/filesTest/";
-    //private final String uriAddress = "github.com/vivianduarte777/files/";
-    private final Path fileUrl = null;
+
+    private Map<String,String> filesNameExtension=new HashMap<>();
 
     @Autowired
     private FileReadServiceImpl service;
 
     private List<FileReadedInformation> fileInfo;
 
-   //@GetMapping(path="/api/read")
    @RequestMapping(value="/",method=RequestMethod.GET)
     public String check() {
-       String strUrl = null;
-        try {
+         try {
             URI uri = new URI(uriAddress);
 
            URL url = getURL(uriAddress);
-          Object obj = url.getContent();
 
-            strUrl= Paths.get(url.toURI().getPath()).toString();
-           ReadableByteChannel rbc = Channels.newChannel(url.openStream());
-            if(rbc.isOpen()){
-                System.out.println("Open");
-             }
-           Path path = getPath(url);
-           Stream<Path> pathStream = service.loadAll(path);
+            Document doc = Jsoup.connect(uriAddress.toString()).get();
 
-           pathStream.forEachOrdered(path1->{
-              try{
-                  readInformation(path1.toFile());
-              }catch(IOException err){
-                  err.printStackTrace();
-              }
+            Elements allElements = doc.getAllElements();
 
-          });
+           // System.out.println(allElements.toString());
+
+            Elements files= doc.getElementsByClass("js-navigation-open Link--primary");
+
+            getAllFiles(files);
+
+            return files.toString();
 
         }catch(Exception e){
            e.printStackTrace();
 
            return e.getMessage();
        }
-        if(strUrl !=null) {
-            return strUrl;
-        }else{
-            return "null";
-        }
-
-
+    //return "ok";
    }
 
-    private void readInformation(File toFile)  throws IOException  {
-       long lines = returnLines(toFile);
-       int  count = returnBytesCount(toFile);
-       String name = returnExtensionName(toFile);
+    private void getAllFiles(Elements elements) {
+       for(Element e:elements){
+           String name =e.attr("title");
+           int lgt =name.length();
+           String extension = name.substring(lgt - 3, lgt);
+           System.out.println(extension);
+           filesNameExtension.put(name,extension);
 
-       FileReadedInformation readedInformation = new FileReadedInformation(name,lines,count,count);
-
-        fileInfo.add(readedInformation);
-
+         }
 
     }
 
-    private long returnLines(File f) throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(f));
+    private long returnLines(String f) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader("file:///github.com/vivianduarte777/filesTest/blob/main/aluguel.pdf"));
         return reader.lines().count();
     }
 
-    private int returnBytesCount(File f) throws IOException {
-        FileInputStream stream = new FileInputStream(f.getAbsoluteFile().getName());
+    private int returnBytesCount(String f) throws IOException {
+        FileInputStream stream = new FileInputStream(f);
         return stream.readAllBytes().length;
     }
 
-    private String returnExtensionName(File f) throws IOException {
-      return f.getAbsoluteFile().getParentFile().getName();
+    private String returnExtensionName(String f) throws IOException {
+      return f;
      }
 
     private URL getURL(String urlAddress) throws  MalformedURLException{
@@ -111,14 +99,8 @@ public class ReadFileController {
     }
 
     private Path getPath(URL url) throws URISyntaxException,  IOException{
-        //  FileSystems.newFileSystem(uri, Collections.emptyMap());
 
-        Resource resource = new ClassPathResource(url.getPath());
-        URI uri = url.toURI();
-        System.out.println(uri);
-       // FileSystem fs = FileSystems.newFileSystem(uri, Collections.emptyMap());
-
-        Path path = Paths.get(uri);
+  Path path = Paths.get(url.toURI()).getRoot();
         System.out.println(path);
         if (Files.isDirectory(path)) {
             System.out.println("file type is directory");
