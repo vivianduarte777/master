@@ -14,6 +14,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.web.bind.annotation.*;
 
+import javax.net.ssl.HttpsURLConnection;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.*;
 import java.net.*;
@@ -56,7 +57,7 @@ public class ReadFileController {
 
             Elements files= doc.getElementsByClass("js-navigation-open Link--primary");
 
-            getAllFiles(files);
+            getAllFiles(files,url);
 
             return files.toString();
 
@@ -68,62 +69,67 @@ public class ReadFileController {
     //return "ok";
    }
 
-    private void getAllFiles(Elements elements) {
-       for(Element e:elements){
-           String name =e.attr("title");
-           int lgt =name.length();
-           String extension = name.substring(lgt - 3, lgt);
-           System.out.println(extension);
-           filesNameExtension.put(name,extension);
+    private void getAllFiles(Elements elements,URL url) {
+        for (Element e : elements) {
+            String name = e.attr("title");
+            int lgt = name.length();
+            int indexOf = name.indexOf(".");
+            String extension = name.substring(indexOf, lgt);
+            System.out.println(extension);
+           try {
+                String urFileStr = uriAddress + "blob/main/" + name;
+                try {
+                    URI uriFile = new URI(urFileStr);
+                    URL urlFile = getURL(uriAddress);
+                    HttpURLConnection httpConn = (HttpURLConnection) urlFile.openConnection();
+                    int responseCode = httpConn.getResponseCode();
+                    if (responseCode == HttpURLConnection.HTTP_OK) {
+                        int lines = returnLines(httpConn);
+                        int buffers = returnBytesCount(httpConn);
+                        String strName = name + " lines = "+lines + " buffers "+ buffers;
+                        System.out.println("strName " + strName);
+                        filesNameExtension.put(strName, extension);
+                      }
+                    httpConn.disconnect();
+                } catch (Exception errFile) {
+                    System.out.println(errFile.getMessage());
+                }
 
+
+                 } catch (Exception errFiles) {
+               System.out.println(errFiles.getMessage());
+
+           }
+
+        }
+    }
+
+    private int returnLines(HttpURLConnection httpConn) throws IOException {
+        InputStream inputstream = httpConn.getInputStream();
+       int dataInputStream= inputstream.read();
+       System.out.println("lines "+dataInputStream);
+        return dataInputStream;
+    }
+
+        private int returnBytesCount (HttpURLConnection httpConn) throws IOException {
+            InputStream inputstream = httpConn.getInputStream();
+            int dataInputStream = 0;
+            dataInputStream= inputstream.read();
+            if (dataInputStream != -1) {
+                System.out.println(dataInputStream);
+               dataInputStream = inputstream.readAllBytes().length + dataInputStream;
+                System.out.println("readByteCounts " + dataInputStream);
+                return dataInputStream;
+           }
+            return 0;
          }
 
-    }
-
-    private long returnLines(String f) throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader("file:///github.com/vivianduarte777/filesTest/blob/main/aluguel.pdf"));
-        return reader.lines().count();
-    }
-
-    private int returnBytesCount(String f) throws IOException {
-        FileInputStream stream = new FileInputStream(f);
-        return stream.readAllBytes().length;
-    }
-
-    private String returnExtensionName(String f) throws IOException {
-      return f;
-     }
-
-    private URL getURL(String urlAddress) throws  MalformedURLException{
-        return new URL(urlAddress);
-    }
-
-    private Path getPath(URL url) throws URISyntaxException,  IOException{
-
-  Path path = Paths.get(url.toURI()).getRoot();
-        System.out.println(path);
-        if (Files.isDirectory(path)) {
-            System.out.println("file type is directory");
-        } else if (Files.isRegularFile(path)) {
-            System.out.println("file type is regular file");
-        } else {
-            System.out.println("file is neither directory nor regular");
+        private String returnExtensionName (String f) throws IOException {
+            return f;
         }
-        Files.walk(path).forEach((Path child) -> {
-            if (Files.isRegularFile(child)) {
-                System.out.print("Regular file: " + child);
-            } else {
-                System.out.print("Directory: " + child);
-            }
-        });
 
-     /*   File file = Paths.get(url.toURI().getPath()).toFile();
-       System.out.println(file.getPath());
-        Path path = Paths.get(url.toURI());
-*/
-        System.out.println(path.getFileSystem());
+        private URL getURL (String urlAddress) throws MalformedURLException {
+            return new URL(urlAddress);
+        }
 
-
-        return path;
     }
-}
