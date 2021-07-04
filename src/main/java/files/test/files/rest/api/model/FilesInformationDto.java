@@ -4,9 +4,9 @@ public class FilesInformationDto {
    private String extension = null;
    private int count = 0;
    private  int lines =0;
-   private  long bytes =0;
+   private  int bytes =0;
 
-    public FilesInformationDto(String extension, int count, int lines, long bytes) {
+    public FilesInformationDto(String extension, int count, int lines, int bytes) {
         this.extension = extension;
         this.count = count;
         this.lines = lines;
@@ -37,11 +37,11 @@ public class FilesInformationDto {
         this.lines = lines;
     }
 
-    public long getBytes() {
+    public int getBytes() {
         return bytes;
     }
 
-    public void setBytes(long bytes) {
+    public void setBytes(int bytes) {
         this.bytes = bytes;
     }
 }

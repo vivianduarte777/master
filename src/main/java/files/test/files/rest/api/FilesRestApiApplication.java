@@ -11,17 +11,18 @@ import org.springframework.boot.web.embedded.tomcat.TomcatConnectorCustomizer;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication
-
 
 public class FilesRestApiApplication {
     public static void main(String[] args) {
         SpringApplication.run(FilesRestApiApplication.class, args);
     }
 
-
-    @Bean
+     @Bean
     public ServletWebServerFactory servletContainer(){
         TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory(){
             @Override
@@ -49,4 +50,6 @@ public class FilesRestApiApplication {
         con.setRedirectPort(8443);
         return con;
     }
+
+
 }
