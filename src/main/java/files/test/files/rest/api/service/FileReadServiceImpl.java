@@ -6,8 +6,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -27,10 +25,6 @@ public class FileReadServiceImpl implements FileReadService {
     public void init(String urlAddress) {
         this.urlAddress = urlAddress;
     }
-
-   /*   public FileReadServiceImpl(String urlAddress) {
-        this.urlAddress = urlAddress;
-    }*/
 
     //Insert the Map object throw the File read
     @Async
@@ -97,7 +91,6 @@ public class FileReadServiceImpl implements FileReadService {
 
     }
 
-
     //Take the URL object from the String url
     @Async
     private URL getURL(String urlAddress) throws MalformedURLException {
@@ -106,8 +99,7 @@ public class FileReadServiceImpl implements FileReadService {
     //Take the number of line from the particular file
     @Async
     private int returnLines(HttpURLConnection httpConn,String fileName) throws IOException {
-         int numLinhas = 0;
-         //String link = httpConn.getURL().toString()+"blob/main/" + fileName;
+         int linesNum = 0;
         try {
             InputStream inputStream = new URL(httpConn.getURL().toString()).openStream();
             BufferedReader read = new BufferedReader(
@@ -115,14 +107,14 @@ public class FileReadServiceImpl implements FileReadService {
             String inputLine;
             while ((inputLine = read.readLine()) != null) {
                 System.out.println(inputLine);
-                ++numLinhas;
+                ++linesNum;
             }
             read.close();
             inputStream.close();
          }catch(Exception e){
             System.out.println(e.getMessage());
         }
-        return numLinhas;
+        return linesNum;
     }
 
     //Take the number of Bytes from the particular file

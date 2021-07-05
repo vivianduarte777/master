@@ -15,16 +15,12 @@ import java.util.concurrent.Executor;
 public class AsyncConfiguration {
     @Qualifier
     private String urlAddress  = "https://github.com/vivianduarte777/filesTest/";
-
-
-//@Bean (name = "urlAddress")
-    public Executor taskExecutor() {
+  public Executor taskExecutor() {
          final ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(2);
         executor.setMaxPoolSize(2);
         executor.setQueueCapacity(100);
         executor.setThreadNamePrefix("ReadFilesThread-");
-         // executor.setThreadNamePrefix(urlAddress);
         executor.initialize();
         return executor;
     }
