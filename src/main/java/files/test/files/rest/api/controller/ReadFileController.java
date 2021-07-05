@@ -2,13 +2,10 @@ package files.test.files.rest.api.controller;
 
 import files.test.files.rest.api.model.FileInformationModel;
 import files.test.files.rest.api.model.FilesInformationDto;
-import files.test.files.rest.api.model.UrlModel;
 import files.test.files.rest.api.service.FileReadServiceImpl;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
-
-import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -30,29 +27,14 @@ public class ReadFileController{
    }
 
    @PostMapping("read")
-  // public String check() {
-   //public String getForm(Model model){
-   // return model.getAttribute("fileInformation").toString();
-       public String postForm(@ModelAttribute FileInformationModel infidel, Model model) {
-         // model.getAttribute("fileInformation");
-           FileInformationModel m = new FileInformationModel();
-           m.setUrlAddress(infidel.getUrlAddress());
-           model.addAttribute("urlAddress", m);
-           m.setFileInformation(getFilesInformation());
-           model.addAttribute("fileInformation",m.getFileInformation());
-return m.getFileInformation();
+     public String postForm(@ModelAttribute FileInformationModel infidel, Model model) {
+         FileInformationModel m = new FileInformationModel();
+         m.setUrlAddress(infidel.getUrlAddress());
+         model.addAttribute("urlAddress", m);
+         m.setFileInformation(getFilesInformation());
+         model.addAttribute("fileInformation",m.getFileInformation());
+         return m.getFileInformation();
       }
-/*
-    @PostMapping("read")
-    public String postForm(@ModelAttribute FileInformationModel infidel, Model model) {
-      // model.getAttribute("fileInformation");
-        FileInformationModel m = new FileInformationModel();
-        m.setUrlAddress(infidel.getUrlAddress());
-        model.addAttribute("urlAddress", m);
-        m.setFileInformation(getFilesInformation());
-        model.addAttribute("fileInformation",m.getFileInformation());
-        return 'result';
-     }*/
 
     public List<FilesInformationDto> getListDto() {
         return listDto;
